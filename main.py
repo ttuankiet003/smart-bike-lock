@@ -10,8 +10,8 @@ templates = Jinja2Templates(directory="templates")
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request):
     return templates.TemplateResponse(
-        "dashboard.html",
-        {
+        name="dashboard.html",
+        context={
             "request": request,
             "status": "ONLINE",
             "lock": "LOCKED"
