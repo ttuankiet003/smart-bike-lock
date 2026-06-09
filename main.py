@@ -3,6 +3,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 import json
 import os
+from pydantic import BaseModel
+
+
 
 app = FastAPI()
 
@@ -140,3 +143,21 @@ async def pending_users():
     ]
 
     return JSONResponse(content=waiting_users)
+
+class EnrollRequest(BaseModel):
+    id: int
+@app.post("/enroll_success")
+async def enroll_success(data: EnrollRequest):
+
+    users = load_users()
+
+    for u in users:
+        if u["id"] == data.id:
+            u["status"] = "enrolled"
+
+    save_users(users)
+
+    return {
+        "success": True,
+        "id": data.id
+    }
