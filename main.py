@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 import json
 import os
@@ -9,8 +9,41 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 # =========================
+# Database
+# =========================
+
+os.makedirs("data", exist_ok=True)
+
+USERS_FILE = "data/users.json"
+
+# Tạo file nếu chưa tồn tại
+if not os.path.exists(USERS_FILE):
+    with open(USERS_FILE, "w", encoding="utf-8") as f:
+        json.dump([], f)
+
+
+def load_users():
+    try:
+        with open(USERS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except:
+        return []
+
+
+def save_users(users):
+    with open(USERS_FILE, "w", encoding="utf-8") as f:
+        json.dump(
+            users,
+            f,
+            ensure_ascii=False,
+            indent=4
+        )
+
+
+# =========================
 # Dashboard
 # =========================
+
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request):
 
@@ -26,25 +59,22 @@ async def dashboard(request: Request):
         }
     )
 
+
 # =========================
-# User Database
+# API USERS
 # =========================
-os.makedirs("data", exist_ok=True)
 
-USERS_FILE = "data/users.json"
+@app.get("/api/users")
+async def api_users():
 
-def load_users():
-    try:
-        with open(USERS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except:
-        return []
+    users = load_users()
 
-def save_users(users):
-    with open(USERS_FILE, "w", encoding="utf-8") as f:
-        json.dump(users, f, ensure_ascii=False, indent=4)
+    return JSONResponse(content=users)
 
 
+# =========================
+# Add User
+# =========================
 
 @app.post("/add_user")
 async def add_user(
@@ -54,6 +84,7 @@ async def add_user(
 
     users = load_users()
 
+    # Không cho trùng ID
     for u in users:
         if u["id"] == id:
             return RedirectResponse(
@@ -63,7 +94,8 @@ async def add_user(
 
     users.append({
         "id": id,
-        "name": name
+        "name": name,
+        "status": "waiting"
     })
 
     save_users(users)
@@ -72,9 +104,12 @@ async def add_user(
         url="/",
         status_code=303
     )
+
+
 # =========================
 # Delete User
 # =========================
+
 @app.post("/delete_user")
 async def delete_user(
     id: int = Form(...)
