@@ -147,21 +147,27 @@ async def pending_users():
 class EnrollRequest(BaseModel):
     id: int
 @app.post("/enroll_success")
-async def enroll_success(request: Request):
-
-    data = await request.json()
-
-    uid = int(data["id"])
+async def enroll_success(data: EnrollRequest):
 
     users = load_users()
 
+    found = False
+
     for u in users:
-        if u["id"] == uid:
+        if u["id"] == data.id:
             u["status"] = "enrolled"
+            found = True
+            break
+
+    if not found:
+        return {
+            "success": False,
+            "message": f"Không tìm thấy ID {data.id}"
+        }
 
     save_users(users)
 
     return {
         "success": True,
-        "id": uid
+        "id": data.id
     }
