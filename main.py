@@ -15,9 +15,14 @@ templates = Jinja2Templates(directory="templates")
 # Database
 # =========================
 
-os.makedirs("data", exist_ok=True)
+DATA_DIR = "/data"
 
-USERS_FILE = "data/users.json"
+os.makedirs(DATA_DIR, exist_ok=True)
+
+USERS_FILE = os.path.join(
+    DATA_DIR,
+    "users.json"
+)
 
 # Tạo file nếu chưa tồn tại
 if not os.path.exists(USERS_FILE):
