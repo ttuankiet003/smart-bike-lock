@@ -1,24 +1,40 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Smart Bike Lock</title>
-</head>
-<body>
+<h2>🚲 Smart Bike Lock</h2>
 
-    <h1>🚗 Smart Bike Lock System</h1>
+<p>Server: {{ status }}</p>
+<p>Khóa xe: {{ lock }}</p>
 
-    <hr>
+<hr>
 
-    <h3>Status:</h3>
+<h3>Thêm người dùng</h3>
 
-    <p>ESP32: {{ status }}</p>
+<form action="/add_user" method="post">
+    <input type="number" name="id" placeholder="ID">
+    <input type="text" name="name" placeholder="Tên">
+    <button type="submit">Thêm</button>
+</form>
 
-    <p>Lock: {{ lock }}</p>
+<hr>
 
-    <hr>
+<h3>Danh sách vân tay</h3>
 
-    <button>Mở khóa</button>
-    <button>Khóa xe</button>
+<table border="1">
+<tr>
+    <th>ID</th>
+    <th>Tên</th>
+    <th>Xóa</th>
+</tr>
 
-</body>
-</html>
+{% for u in users %}
+<tr>
+    <td>{{ u.id }}</td>
+    <td>{{ u.name }}</td>
+    <td>
+        <form action="/delete_user" method="post">
+            <input type="hidden" name="id" value="{{ u.id }}">
+            <button>Xóa</button>
+        </form>
+    </td>
+</tr>
+{% endfor %}
+
+</table>
