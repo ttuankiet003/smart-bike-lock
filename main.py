@@ -128,3 +128,15 @@ async def delete_user(
         url="/",
         status_code=303
     )
+
+@app.get("/api/pending_users")
+async def pending_users():
+
+    users = load_users()
+
+    waiting_users = [
+        u for u in users
+        if u.get("status") == "waiting"
+    ]
+
+    return JSONResponse(content=waiting_users)
