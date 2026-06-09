@@ -1,40 +1,136 @@
-<h2>🚲 Smart Bike Lock</h2>
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Smart Bike Lock</title>
+
+```
+<style>
+
+    body{
+        font-family: Arial;
+        margin:40px;
+    }
+
+    .card{
+        border:1px solid #ddd;
+        padding:20px;
+        border-radius:10px;
+        margin-bottom:20px;
+    }
+
+    table{
+        width:100%;
+        border-collapse:collapse;
+    }
+
+    th,td{
+        border:1px solid #ddd;
+        padding:10px;
+        text-align:center;
+    }
+
+    th{
+        background:#f0f0f0;
+    }
+
+    button{
+        padding:8px 15px;
+        cursor:pointer;
+    }
+
+</style>
+```
+
+</head>
+
+<body>
+
+<h1>🚲 Smart Bike Lock</h1>
+
+<div class="card">
+
+```
+<h3>Trạng thái hệ thống</h3>
 
 <p>Server: {{ status }}</p>
+
 <p>Khóa xe: {{ lock }}</p>
+```
 
-<hr>
+</div>
 
-<h3>Thêm người dùng</h3>
+<div class="card">
+
+```
+<h3>➕ Thêm người dùng</h3>
 
 <form action="/add_user" method="post">
-    <input type="number" name="id" placeholder="ID">
-    <input type="text" name="name" placeholder="Tên">
-    <button type="submit">Thêm</button>
+
+    <input type="number"
+           name="id"
+           placeholder="ID">
+
+    <input type="text"
+           name="name"
+           placeholder="Tên">
+
+    <button type="submit">
+        Thêm
+    </button>
+
 </form>
+```
 
-<hr>
+</div>
 
-<h3>Danh sách vân tay</h3>
+<div class="card">
 
-<table border="1">
-<tr>
-    <th>ID</th>
-    <th>Tên</th>
-    <th>Xóa</th>
-</tr>
+```
+<h3>👤 Danh sách vân tay</h3>
 
-{% for u in users %}
-<tr>
-    <td>{{ u.id }}</td>
-    <td>{{ u.name }}</td>
-    <td>
-        <form action="/delete_user" method="post">
-            <input type="hidden" name="id" value="{{ u.id }}">
-            <button>Xóa</button>
-        </form>
-    </td>
-</tr>
-{% endfor %}
+<table>
+
+    <tr>
+        <th>ID</th>
+        <th>Tên</th>
+        <th>Xóa</th>
+    </tr>
+
+    {% for u in users %}
+
+    <tr>
+
+        <td>{{ u.id }}</td>
+
+        <td>{{ u.name }}</td>
+
+        <td>
+
+            <form action="/delete_user"
+                  method="post">
+
+                <input type="hidden"
+                       name="id"
+                       value="{{ u.id }}">
+
+                <button>
+                    Xóa
+                </button>
+
+            </form>
+
+        </td>
+
+    </tr>
+
+    {% endfor %}
 
 </table>
+```
+
+</div>
+
+</body>
+</html>

@@ -13,12 +13,16 @@ templates = Jinja2Templates(directory="templates")
 # =========================
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request):
+
+    users = load_users()
+
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
         context={
             "status": "ONLINE",
-            "lock": "LOCKED"
+            "lock": "LOCKED",
+            "users": users
         }
     )
 
@@ -40,133 +44,8 @@ def save_users(users):
     with open(USERS_FILE, "w", encoding="utf-8") as f:
         json.dump(users, f, ensure_ascii=False, indent=4)
 
-# =========================
-# Fingerprint Manager
-# =========================
-@app.get("/fingerprints", response_class=HTMLResponse)
-async def fingerprints():
 
-    users = load_users()
 
-    rows = ""
-
-    for u in users:
-        rows += f"""
-        <tr>
-            <td>{u['id']}</td>
-            <td>{u['name']}</td>
-
-            <td>
-                <form action="/delete_user" method="post">
-                    <input type="hidden" name="id" value="{u['id']}">
-                    <button style="background:red;color:white;">
-                        Xóa
-                    </button>
-                </form>
-            </td>
-        </tr>
-        """
-
-    return HTMLResponse(f"""
-    <!DOCTYPE html>
-    <html>
-
-    <head>
-        <title>Quản lý vân tay</title>
-
-        <style>
-
-            body {{
-                font-family: Arial;
-                margin: 30px;
-            }}
-
-            table {{
-                border-collapse: collapse;
-                width: 100%;
-            }}
-
-            th, td {{
-                border: 1px solid #ddd;
-                padding: 10px;
-                text-align: center;
-            }}
-
-            th {{
-                background: #f2f2f2;
-            }}
-
-            .add-box {{
-                margin-bottom: 20px;
-            }}
-
-            input {{
-                padding: 8px;
-            }}
-
-            button {{
-                padding: 8px 15px;
-                cursor: pointer;
-            }}
-
-        </style>
-
-    </head>
-
-    <body>
-
-        <h1>🔐 Quản lý vân tay</h1>
-
-        <div class="add-box">
-
-            <form action="/add_user" method="post">
-
-                <input
-                    type="number"
-                    name="id"
-                    placeholder="ID vân tay"
-                    required>
-
-                <input
-                    type="text"
-                    name="name"
-                    placeholder="Tên người dùng"
-                    required>
-
-                <button type="submit">
-                    ➕ Thêm
-                </button>
-
-            </form>
-
-        </div>
-
-        <table>
-
-            <tr>
-                <th>ID</th>
-                <th>Tên</th>
-                <th>Hành động</th>
-            </tr>
-
-            {rows}
-
-        </table>
-
-        <br>
-
-        <a href="/">
-            ⬅ Quay về Dashboard
-        </a>
-
-    </body>
-
-    </html>
-    """)
-
-# =========================
-# Add User
-# =========================
 @app.post("/add_user")
 async def add_user(
     id: int = Form(...),
@@ -175,11 +54,10 @@ async def add_user(
 
     users = load_users()
 
-    # tránh trùng ID
     for u in users:
         if u["id"] == id:
             return RedirectResponse(
-                url="/fingerprints",
+                url="/",
                 status_code=303
             )
 
@@ -191,10 +69,9 @@ async def add_user(
     save_users(users)
 
     return RedirectResponse(
-        url="/fingerprints",
+        url="/",
         status_code=303
     )
-
 # =========================
 # Delete User
 # =========================
@@ -213,6 +90,6 @@ async def delete_user(
     save_users(users)
 
     return RedirectResponse(
-        url="/fingerprints",
+        url="/",
         status_code=303
     )
