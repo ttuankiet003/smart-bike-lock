@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 import json
 import os
 from pydantic import BaseModel
-
+from fastapi import Body
 
 
 app = FastAPI()
@@ -180,3 +180,40 @@ async def enroll_success(request: Request):
         "success": True,
         "id": uid
     }
+# =========================
+# Unlock Log
+# =========================
+
+UNLOCK_LOG = []
+
+@app.post("/unlock")
+async def unlock(request: Request):
+
+    data = await request.json()
+
+    uid = int(data["id"])
+
+    users = load_users()
+
+    name = "Unknown"
+
+    for u in users:
+        if u["id"] == uid:
+            name = u["name"]
+            break
+
+    UNLOCK_LOG.insert(
+        0,
+        {
+            "id": uid,
+            "name": name
+        }
+    )
+
+    return {
+        "success": True
+    }
+@app.get("/api/unlock_logs")
+async def get_unlock_logs():
+
+    return UNLOCK_LOG
