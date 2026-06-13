@@ -291,7 +291,7 @@ async def dashboard(
             "users": users,
             "logs": UNLOCK_LOG,
             "esp_online": esp_online,
-           "emergency_unlock": emergency["unlock"]
+            "emergency_unlock": emergency["unlock"]
         }
     )
 
@@ -603,13 +603,7 @@ async def api_lock_status():
     return {
         "status": LOCK_STATUS
     }
-@app.get("/api/emergency_unlock")
-async def get_emergency_unlock():
-    global EMERGENCY_UNLOCK
 
-    return {
-        "unlock": EMERGENCY_UNLOCK
-    }
 @app.post("/emergency_unlock")
 async def emergency_unlock():
 
@@ -617,11 +611,17 @@ async def emergency_unlock():
 
     unlock = data["unlock"]
 
+    new_state = not unlock
+
+    print("Emergency =", new_state)
+
     save_emergency(
         {
-            "unlock": not unlock
+            "unlock": new_state
         }
     )
+
+    print(load_emergency())
 
     return RedirectResponse(
         "/",
