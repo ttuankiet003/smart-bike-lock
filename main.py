@@ -5,10 +5,15 @@ import json
 import os
 from pydantic import BaseModel
 from fastapi import Body
-
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi import Depends, HTTPException, status
+import secrets
 
 app = FastAPI()
+security = HTTPBasic()
 
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "123456"
 templates = Jinja2Templates(directory="templates")
 
 # =========================
@@ -47,13 +52,37 @@ def save_users(users):
             indent=4
         )
 
+# mật khẩu
+def verify_admin(
+    credentials: HTTPBasicCredentials = Depends(security)
+):
+    correct_username = secrets.compare_digest(
+        credentials.username,
+        ADMIN_USERNAME
+    )
 
+    correct_password = secrets.compare_digest(
+        credentials.password,
+        ADMIN_PASSWORD
+    )
+
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Sai tài khoản hoặc mật khẩu",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    return True
 # =========================
 # Dashboard
 # =========================
 
 @app.get("/", response_class=HTMLResponse)
-async def dashboard(request: Request):
+async def dashboard(
+    request: Request,
+    auth: bool = Depends(verify_admin)
+):
 
     users = load_users()
 
@@ -86,6 +115,7 @@ async def api_users():
 
 @app.post("/add_user")
 async def add_user(
+    auth: bool = Depends(verify_admin),
     id: int = Form(...),
     name: str = Form(...)
 ):
@@ -120,6 +150,7 @@ async def add_user(
 
 @app.post("/delete_user")
 async def delete_user(
+    auth: bool = Depends(verify_admin),
     id: int = Form(...)
 ):
 
