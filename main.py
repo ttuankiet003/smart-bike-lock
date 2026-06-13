@@ -26,7 +26,7 @@ templates = Jinja2Templates(directory="templates")
 # =========================
 # Database
 # =========================
-
+LOCK_STATUS = "LOCKED"
 DATA_DIR = "/data"
 
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -345,7 +345,7 @@ async def add_user(
                 name="dashboard.html",
                 context={
                     "status": "ONLINE",
-                    "lock": "LOCKED",
+                    "lock": LOCK_STATUS,
                     "users": users,
                     "logs": UNLOCK_LOG,
                     "error": f"ID {id} đã tồn tại"
@@ -584,4 +584,23 @@ async def heartbeat():
 
     return {
         "success": True
+    }
+@app.post("/lock_status")
+async def lock_status(
+    request: Request
+):
+    global LOCK_STATUS
+
+    data = await request.json()
+
+    LOCK_STATUS = data["status"]
+
+    return {
+        "success": True
+    }
+@app.get("/api/lock_status")
+async def api_lock_status():
+
+    return {
+        "status": LOCK_STATUS
     }

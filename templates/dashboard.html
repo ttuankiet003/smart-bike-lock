@@ -56,11 +56,13 @@
         </p>
 
         <p>
-            <strong>Khóa xe:</strong>
+            Khóa xe:
+            <span id="lockStatus">
             {{ lock }}
+        </span>
         </p>
 
-    </div>
+</div>
 
 </div>
 <p>
@@ -325,6 +327,23 @@ OFFLINE
 
 </div>
 
+<script>
+setInterval(async () => {
 
+    let res =
+        await fetch(
+            "/api/lock_status"
+        );
+
+    let data =
+        await res.json();
+
+    document.getElementById(
+        "lockStatus"
+    ).innerHTML =
+        data.status;
+
+}, 1000);
+</script>
 </body>
 </html>
