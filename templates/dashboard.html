@@ -192,46 +192,56 @@ OFFLINE
 
         <h3>🔓 Mở khóa khẩn cấp</h3>
 
-        <p>
-            Trạng thái:
-            {% if lock == "UNLOCKED" %}
+        {% if emergency_unlock %}
+
+            <p>
                 <span class="badge bg-success">
-                    ĐANG MỞ
+                    ĐANG MỞ KHẨN CẤP
                 </span>
-            {% else %}
+            </p>
+
+        {% else %}
+
+            <p>
                 <span class="badge bg-secondary">
                     ĐANG KHÓA
                 </span>
-            {% endif %}
-        </p>
+            </p>
+
+        {% endif %}
 
         <form
             action="/emergency_unlock"
             method="post">
 
-            {% if lock == "UNLOCKED" %}
-    {% set msg = "Bạn có muốn KHÓA xe lại không?" %}
-{% else %}
-    {% set msg = "Bạn có muốn MỞ KHÓA KHẨN CẤP không?" %}
-{% endif %}
+            {% if emergency_unlock %}
 
-<button
-    type="submit"
-    class="btn btn-warning"
-    onclick="return confirm('{{ msg }}')">
+                <button
+                    type="submit"
+                    class="btn btn-danger"
+                    onclick="return confirm('Bạn có muốn KHÓA xe lại không?')">
 
-    {% if lock == "UNLOCKED" %}
-        🔒 KHÓA LẠI
-    {% else %}
-        🔓 MỞ KHÓA KHẨN CẤP
-    {% endif %}
+                    🔒 KHÓA LẠI
 
-</button>
+                </button>
+
+            {% else %}
+
+                <button
+                    type="submit"
+                    class="btn btn-warning"
+                    onclick="return confirm('Bạn có muốn MỞ KHÓA KHẨN CẤP không?')">
+
+                    🔓 MỞ KHÓA KHẨN CẤP
+
+                </button>
+
+            {% endif %}
 
         </form>
 
         <small class="text-muted">
-            Chức năng này dùng khi cảm biến vân tay không thể sử dụng.
+            Sử dụng khi cảm biến vân tay không hoạt động.
         </small>
 
     </div>

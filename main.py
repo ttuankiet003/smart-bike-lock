@@ -52,6 +52,7 @@ STATUS_FILE = os.path.join(
     DATA_DIR,
     "esp_status.json"
 )
+
 if not os.path.exists(STATUS_FILE):
 
     with open(
@@ -282,7 +283,8 @@ async def dashboard(
             "lock": "LOCKED",
             "users": users,
             "logs": UNLOCK_LOG,
-            "esp_online": esp_online
+            "esp_online": esp_online,
+            "emergency_unlock": EMERGENCY_UNLOCK
         }
     )
 
@@ -350,6 +352,7 @@ async def add_user(
                     "users": users,
                     "logs": UNLOCK_LOG,
                     "error": f"ID {id} đã tồn tại"
+                  
                 }
             )
 
