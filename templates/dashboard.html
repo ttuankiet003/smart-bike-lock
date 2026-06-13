@@ -192,18 +192,47 @@ OFFLINE
 
         <h3>🔓 Mở khóa khẩn cấp</h3>
 
-        <form action="/emergency_unlock"
-              method="post">
+        <p>
+            Trạng thái:
+            {% if lock == "UNLOCKED" %}
+                <span class="badge bg-success">
+                    ĐANG MỞ
+                </span>
+            {% else %}
+                <span class="badge bg-secondary">
+                    ĐANG KHÓA
+                </span>
+            {% endif %}
+        </p>
 
-            <button
-                class="btn btn-danger"
-                onclick="return confirm('Bạn chắc chắn muốn mở khóa khẩn cấp?')">
+        <form
+            action="/emergency_unlock"
+            method="post">
 
-                MỞ KHÓA NGAY
+            {% if lock == "UNLOCKED" %}
+    {% set msg = "Bạn có muốn KHÓA xe lại không?" %}
+{% else %}
+    {% set msg = "Bạn có muốn MỞ KHÓA KHẨN CẤP không?" %}
+{% endif %}
 
-            </button>
+<button
+    type="submit"
+    class="btn btn-warning"
+    onclick="return confirm('{{ msg }}')">
+
+    {% if lock == "UNLOCKED" %}
+        🔒 KHÓA LẠI
+    {% else %}
+        🔓 MỞ KHÓA KHẨN CẤP
+    {% endif %}
+
+</button>
 
         </form>
+
+        <small class="text-muted">
+            Chức năng này dùng khi cảm biến vân tay không thể sử dụng.
+        </small>
 
     </div>
 

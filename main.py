@@ -27,6 +27,7 @@ templates = Jinja2Templates(directory="templates")
 # Database
 # =========================
 LOCK_STATUS = "LOCKED"
+EMERGENCY_UNLOCK = False
 DATA_DIR = "/data"
 
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -603,4 +604,28 @@ async def api_lock_status():
 
     return {
         "status": LOCK_STATUS
+    }
+@app.get("/api/emergency_unlock")
+async def get_emergency_unlock():
+    global EMERGENCY_UNLOCK
+
+    return {
+        "unlock": EMERGENCY_UNLOCK
+    }
+@app.post("/emergency_unlock")
+async def emergency_unlock():
+
+    global EMERGENCY_UNLOCK
+    global LOCK_STATUS
+
+    EMERGENCY_UNLOCK = not EMERGENCY_UNLOCK
+
+    if EMERGENCY_UNLOCK:
+        LOCK_STATUS = "UNLOCKED"
+    else:
+        LOCK_STATUS = "LOCKED"
+
+    return {
+        "success": True,
+        "unlock": EMERGENCY_UNLOCK
     }
