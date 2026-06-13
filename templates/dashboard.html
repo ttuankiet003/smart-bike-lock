@@ -131,6 +131,34 @@
 ```
 
 </div>
+<div class="card">
 
+    <h3>🔓 Lịch sử mở khóa</h3>
+
+    <table>
+
+        <tr>
+            <th>Thời gian</th>
+            <th>ID</th>
+            <th>Tên</th>
+        </tr>
+
+        {% for log in logs %}
+
+        <tr>
+
+            <td>{{ log.time }}</td>
+
+            <td>{{ log.id }}</td>
+
+            <td>{{ log.name }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+</div>
 </body>
 </html>
