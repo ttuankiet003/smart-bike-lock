@@ -11,6 +11,8 @@ import secrets
 from datetime import datetime
 from fastapi.responses import HTMLResponse
 from starlette.middleware.sessions import SessionMiddleware
+import time
+
 app = FastAPI()
 app.add_middleware(
     SessionMiddleware,
@@ -45,6 +47,24 @@ EMERGENCY_FILE = os.path.join(
     DATA_DIR,
     "emergency.json"
 )
+STATUS_FILE = os.path.join(
+    DATA_DIR,
+    "esp_status.json"
+)
+if not os.path.exists(STATUS_FILE):
+
+    with open(
+        STATUS_FILE,
+        "w"
+    ) as f:
+
+        json.dump(
+            {
+                "last_seen": 0
+            },
+            f
+        )
+
 if not os.path.exists(EMERGENCY_FILE):
 
     with open(
@@ -80,6 +100,24 @@ if not os.path.exists(SETTINGS_FILE):
             f,
             indent=4
         )
+def load_status():
+
+    with open(
+        STATUS_FILE,
+        "r"
+    ) as f:
+
+        return json.load(f)
+
+
+def save_status(data):
+
+    with open(
+        STATUS_FILE,
+        "w"
+    ) as f:
+
+        json.dump(data, f)
 def load_emergency():
 
     with open(
@@ -223,6 +261,17 @@ async def dashboard(
         )
 
     users = load_users()
+    status_data = load_status()
+
+    esp_online = False
+
+    if (
+    time.time()
+    -
+    status_data["last_seen"]
+    )   < 60:
+
+        esp_online = True
 
     return templates.TemplateResponse(
         request=request,
@@ -231,7 +280,8 @@ async def dashboard(
             "status": "ONLINE",
             "lock": "LOCKED",
             "users": users,
-            "logs": UNLOCK_LOG
+            "logs": UNLOCK_LOG,
+            "esp_online": esp_online
         }
     )
 
@@ -279,34 +329,43 @@ async def emergency_done():
     }
 @app.post("/add_user")
 async def add_user(
-    auth: bool = Depends(verify_admin),
+    request: Request,
     id: int = Form(...),
     name: str = Form(...)
 ):
 
     users = load_users()
 
-    # Không cho trùng ID
     for u in users:
+
         if u["id"] == id:
-            return RedirectResponse(
-                url="/",
-                status_code=303
+
+            return templates.TemplateResponse(
+                request=request,
+                name="dashboard.html",
+                context={
+                    "status": "ONLINE",
+                    "lock": "LOCKED",
+                    "users": users,
+                    "logs": UNLOCK_LOG,
+                    "error": f"ID {id} đã tồn tại"
+                }
             )
 
-    users.append({
-        "id": id,
-        "name": name,
-        "status": "waiting"
-    })
+    users.append(
+        {
+            "id": id,
+            "name": name,
+            "status": "waiting"
+        }
+    )
 
     save_users(users)
 
     return RedirectResponse(
-        url="/",
+        "/",
         status_code=303
     )
-
 
 # =========================
 # Delete User
@@ -514,3 +573,15 @@ async def logout(request: Request):
         "/login",
         status_code=303
     )
+@app.post("/heartbeat")
+async def heartbeat():
+
+    save_status(
+        {
+            "last_seen": time.time()
+        }
+    )
+
+    return {
+        "success": True
+    }

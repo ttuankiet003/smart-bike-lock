@@ -26,6 +26,15 @@
 <h1 class="mb-4">
     🚲 Smart Bike Lock Dashboard
 </h1>
+{% if error %}
+
+<div class="alert alert-danger">
+
+{{ error }}
+
+</div>
+
+{% endif %}
 <a href="/logout"
    class="btn btn-secondary mb-3">
 
@@ -54,7 +63,25 @@
     </div>
 
 </div>
+<p>
 
+ESP32:
+
+{% if esp_online %}
+
+<span class="badge bg-success">
+ONLINE
+</span>
+
+{% else %}
+
+<span class="badge bg-danger">
+OFFLINE
+</span>
+
+{% endif %}
+
+</p>
 <!-- Thêm người dùng -->
 
 <div class="card shadow-sm mb-3">
