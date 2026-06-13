@@ -305,19 +305,7 @@ async def api_users():
 # Add User
 # =========================
 
-@app.post("/emergency_unlock")
-async def emergency_unlock_button():
 
-    save_emergency(
-        {
-            "unlock": True
-        }
-    )
-
-    return RedirectResponse(
-        "/",
-        status_code=303
-    )
 @app.post("/emergency_done")
 async def emergency_done():
 
