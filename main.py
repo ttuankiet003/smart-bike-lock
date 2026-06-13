@@ -121,13 +121,30 @@ def save_status(data):
 
         json.dump(data, f)
 def load_emergency():
+    try:
+        with open(
+            EMERGENCY_FILE,
+            "r",
+            encoding="utf-8"
+        ) as f:
+            return json.load(f)
+    except:
+        return {
+            "unlock": False
+        }
 
+
+def save_emergency(data):
     with open(
         EMERGENCY_FILE,
-        "r"
+        "w",
+        encoding="utf-8"
     ) as f:
-
-        return json.load(f)
+        json.dump(
+            data,
+            f,
+            indent=4
+        )
 def load_settings():
 
     with open(
@@ -138,14 +155,7 @@ def load_settings():
 
         return json.load(f)
 
-def save_emergency(data):
 
-    with open(
-        EMERGENCY_FILE,
-        "w"
-    ) as f:
-
-        json.dump(data, f)
 def load_users():
     try:
         with open(USERS_FILE, "r", encoding="utf-8") as f:
@@ -242,10 +252,7 @@ def verify_admin(
         )
 
     return True
-@app.get("/api/emergency_unlock")
-async def emergency_unlock():
 
-    return load_emergency()
 # =========================
 # Dashboard
 # =========================
@@ -264,7 +271,7 @@ async def dashboard(
 
     users = load_users()
     status_data = load_status()
-
+    emergency = load_emergency()
     esp_online = False
 
     if (
@@ -273,7 +280,7 @@ async def dashboard(
     status_data["last_seen"]
     )   < 60:
 
-        esp_online = True
+        esp_online = True   
 
     return templates.TemplateResponse(
         request=request,
@@ -284,7 +291,7 @@ async def dashboard(
             "users": users,
             "logs": UNLOCK_LOG,
             "esp_online": esp_online,
-            "emergency_unlock": EMERGENCY_UNLOCK
+           "emergency_unlock": emergency["unlock"]
         }
     )
 
@@ -606,17 +613,21 @@ async def get_emergency_unlock():
 @app.post("/emergency_unlock")
 async def emergency_unlock():
 
-    global EMERGENCY_UNLOCK
-    global LOCK_STATUS
+    data = load_emergency()
 
-    EMERGENCY_UNLOCK = not EMERGENCY_UNLOCK
+    unlock = data["unlock"]
 
-    if EMERGENCY_UNLOCK:
-        LOCK_STATUS = "UNLOCKED"
-    else:
-        LOCK_STATUS = "LOCKED"
+    save_emergency(
+        {
+            "unlock": not unlock
+        }
+    )
 
-    return {
-        "success": True,
-        "unlock": EMERGENCY_UNLOCK
-    }
+    return RedirectResponse(
+        "/",
+        status_code=303
+    )
+@app.get("/api/emergency_unlock")
+async def api_emergency_unlock():
+
+    return load_emergency()
