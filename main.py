@@ -28,12 +28,17 @@ USERS_FILE = os.path.join(
     DATA_DIR,
     "users.json"
 )
-
+DELETE_FILE = os.path.join(
+    DATA_DIR,
+    "delete_queue.json"
+)
 # Tạo file nếu chưa tồn tại
 if not os.path.exists(USERS_FILE):
     with open(USERS_FILE, "w", encoding="utf-8") as f:
         json.dump([], f)
-
+if not os.path.exists(DELETE_FILE):
+    with open(DELETE_FILE, "w", encoding="utf-8") as f:
+        json.dump([], f)
 
 def load_users():
     try:
@@ -51,7 +56,22 @@ def save_users(users):
             ensure_ascii=False,
             indent=4
         )
+def load_delete_queue():
+    try:
+        with open(DELETE_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except:
+        return []
 
+
+def save_delete_queue(data):
+    with open(DELETE_FILE, "w", encoding="utf-8") as f:
+        json.dump(
+            data,
+            f,
+            ensure_ascii=False,
+            indent=4
+        )
 # mật khẩu
 def verify_admin(
     credentials: HTTPBasicCredentials = Depends(security)
@@ -151,23 +171,25 @@ async def add_user(
 
 @app.post("/delete_user")
 async def delete_user(
-    auth: bool = Depends(verify_admin),
     id: int = Form(...)
 ):
 
-    users = load_users()
+    queue = load_delete_queue()
 
-    users = [
-        u for u in users
-        if u["id"] != id
-    ]
+    queue.append({
+        "id": id
+    })
 
-    save_users(users)
+    save_delete_queue(queue)
 
     return RedirectResponse(
         url="/",
         status_code=303
     )
+@app.get("/api/delete_pending")
+async def delete_pending():
+
+    return load_delete_queue()
 
 @app.get("/api/pending_users")
 async def pending_users():
@@ -252,3 +274,32 @@ async def unlock(request: Request):
 async def get_unlock_logs():
 
     return UNLOCK_LOG
+
+@app.post("/delete_success")
+async def delete_success(request: Request):
+
+    data = await request.json()
+
+    uid = int(data["id"])
+
+    users = load_users()
+
+    users = [
+        u for u in users
+        if u["id"] != uid
+    ]
+
+    save_users(users)
+
+    queue = load_delete_queue()
+
+    queue = [
+        q for q in queue
+        if q["id"] != uid
+    ]
+
+    save_delete_queue(queue)
+
+    return {
+        "success": True
+    }
