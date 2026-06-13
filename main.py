@@ -8,7 +8,7 @@ from fastapi import Body
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi import Depends, HTTPException, status
 import secrets
-
+from datetime import datetime
 app = FastAPI()
 security = HTTPBasic()
 
@@ -87,14 +87,15 @@ async def dashboard(
     users = load_users()
 
     return templates.TemplateResponse(
-        request=request,
-        name="dashboard.html",
-        context={
-            "status": "ONLINE",
-            "lock": "LOCKED",
-            "users": users
-        }
-    )
+    request=request,
+    name="dashboard.html",
+    context={
+        "status": "ONLINE",
+        "lock": "LOCKED",
+        "users": users,
+        "logs": UNLOCK_LOG[:20]
+    }
+)
 
 
 # =========================
@@ -237,7 +238,10 @@ async def unlock(request: Request):
         0,
         {
             "id": uid,
-            "name": name
+            "name": name,
+            "time": datetime.now().strftime(
+                "%d/%m/%Y %H:%M:%S"
+            )
         }
     )
 
