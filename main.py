@@ -12,8 +12,6 @@ from datetime import datetime
 app = FastAPI()
 security = HTTPBasic()
 
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "123456"
 templates = Jinja2Templates(directory="templates")
 
 # =========================
@@ -32,6 +30,10 @@ DELETE_FILE = os.path.join(
     DATA_DIR,
     "delete_queue.json"
 )
+SETTINGS_FILE = os.path.join(
+    DATA_DIR,
+    "settings.json"
+)
 # Tạo file nếu chưa tồn tại
 if not os.path.exists(USERS_FILE):
     with open(USERS_FILE, "w", encoding="utf-8") as f:
@@ -39,7 +41,21 @@ if not os.path.exists(USERS_FILE):
 if not os.path.exists(DELETE_FILE):
     with open(DELETE_FILE, "w", encoding="utf-8") as f:
         json.dump([], f)
+if not os.path.exists(SETTINGS_FILE):
+    with open(
+        SETTINGS_FILE,
+        "w",
+        encoding="utf-8"
+    ) as f:
 
+        json.dump(
+            {
+                "username": "admin",
+                "password": "123456"
+            },
+            f,
+            indent=4
+        )
 def load_users():
     try:
         with open(USERS_FILE, "r", encoding="utf-8") as f:
@@ -72,25 +88,67 @@ def save_delete_queue(data):
             ensure_ascii=False,
             indent=4
         )
+def load_settings():
+
+    try:
+        with open(
+            SETTINGS_FILE,
+            "r",
+            encoding="utf-8"
+        ) as f:
+
+            return json.load(f)
+
+    except:
+
+        return {
+            "username": "admin",
+            "password": "123456"
+        }
+
+
+def save_settings(data):
+
+    with open(
+        SETTINGS_FILE,
+        "w",
+        encoding="utf-8"
+    ) as f:
+
+        json.dump(
+            data,
+            f,
+            ensure_ascii=False,
+            indent=4
+        )
 # mật khẩu
 def verify_admin(
     credentials: HTTPBasicCredentials = Depends(security)
 ):
+
+    settings = load_settings()
+
     correct_username = secrets.compare_digest(
         credentials.username,
-        ADMIN_USERNAME
+        settings["username"]
     )
 
     correct_password = secrets.compare_digest(
         credentials.password,
-        ADMIN_PASSWORD
+        settings["password"]
     )
 
-    if not (correct_username and correct_password):
+    if not (
+        correct_username
+        and
+        correct_password
+    ):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Sai tài khoản hoặc mật khẩu",
-            headers={"WWW-Authenticate": "Basic"},
+            status_code=401,
+            detail="Sai tài khoản",
+            headers={
+                "WWW-Authenticate": "Basic"
+            }
         )
 
     return True
@@ -300,6 +358,30 @@ async def delete_success(request: Request):
 
     save_delete_queue(queue)
 
+
     return {
         "success": True
     }
+@app.post("/change_password")
+async def change_password(
+    old_password: str = Form(...),
+    new_password: str = Form(...)
+):
+
+    settings = load_settings()
+
+    if old_password != settings["password"]:
+
+        return RedirectResponse(
+            url="/?error=password",
+            status_code=303
+        )
+
+    settings["password"] = new_password
+
+    save_settings(settings)
+
+    return RedirectResponse(
+        url="/",
+        status_code=303
+    )
