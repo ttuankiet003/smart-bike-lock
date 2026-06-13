@@ -9,8 +9,15 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi import Depends, HTTPException, status
 import secrets
 from datetime import datetime
+from fastapi.responses import HTMLResponse
+from starlette.middleware.sessions import SessionMiddleware
 app = FastAPI()
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="SMART_BIKE_LOCK_2026"
+)
 security = HTTPBasic()
+
 
 templates = Jinja2Templates(directory="templates")
 
@@ -34,6 +41,23 @@ SETTINGS_FILE = os.path.join(
     DATA_DIR,
     "settings.json"
 )
+EMERGENCY_FILE = os.path.join(
+    DATA_DIR,
+    "emergency.json"
+)
+if not os.path.exists(EMERGENCY_FILE):
+
+    with open(
+        EMERGENCY_FILE,
+        "w"
+    ) as f:
+
+        json.dump(
+            {
+                "unlock": False
+            },
+            f
+        )
 # Tạo file nếu chưa tồn tại
 if not os.path.exists(USERS_FILE):
     with open(USERS_FILE, "w", encoding="utf-8") as f:
@@ -56,6 +80,32 @@ if not os.path.exists(SETTINGS_FILE):
             f,
             indent=4
         )
+def load_emergency():
+
+    with open(
+        EMERGENCY_FILE,
+        "r"
+    ) as f:
+
+        return json.load(f)
+def load_settings():
+
+    with open(
+        SETTINGS_FILE,
+        "r",
+        encoding="utf-8"
+    ) as f:
+
+        return json.load(f)
+
+def save_emergency(data):
+
+    with open(
+        EMERGENCY_FILE,
+        "w"
+    ) as f:
+
+        json.dump(data, f)
 def load_users():
     try:
         with open(USERS_FILE, "r", encoding="utf-8") as f:
@@ -152,28 +202,38 @@ def verify_admin(
         )
 
     return True
+@app.get("/api/emergency_unlock")
+async def emergency_unlock():
+
+    return load_emergency()
 # =========================
 # Dashboard
 # =========================
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 async def dashboard(
-    request: Request,
-    auth: bool = Depends(verify_admin)
+    request: Request
 ):
+
+    if "user" not in request.session:
+
+        return RedirectResponse(
+            "/login",
+            status_code=303
+        )
 
     users = load_users()
 
     return templates.TemplateResponse(
-    request=request,
-    name="dashboard.html",
-    context={
-        "status": "ONLINE",
-        "lock": "LOCKED",
-        "users": users,
-        "logs": UNLOCK_LOG[:20]
-    }
-)
+        request=request,
+        name="dashboard.html",
+        context={
+            "status": "ONLINE",
+            "lock": "LOCKED",
+            "users": users,
+            "logs": UNLOCK_LOG
+        }
+    )
 
 
 # =========================
@@ -192,6 +252,31 @@ async def api_users():
 # Add User
 # =========================
 
+@app.post("/emergency_unlock")
+async def emergency_unlock_button():
+
+    save_emergency(
+        {
+            "unlock": True
+        }
+    )
+
+    return RedirectResponse(
+        "/",
+        status_code=303
+    )
+@app.post("/emergency_done")
+async def emergency_done():
+
+    save_emergency(
+        {
+            "unlock": False
+        }
+    )
+
+    return {
+        "success": True
+    }
 @app.post("/add_user")
 async def add_user(
     auth: bool = Depends(verify_admin),
@@ -383,5 +468,49 @@ async def change_password(
 
     return RedirectResponse(
         url="/",
+        status_code=303
+    )
+@app.get("/login")
+async def login_page(request: Request):
+
+    return templates.TemplateResponse(
+        "login.html",
+        {
+            "request": request
+        }
+    )
+@app.post("/login")
+async def login(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...)
+):
+
+    settings = load_settings()
+
+    if (
+        username == settings["username"]
+        and
+        password == settings["password"]
+    ):
+
+        request.session["user"] = username
+
+        return RedirectResponse(
+            "/",
+            status_code=303
+        )
+
+    return RedirectResponse(
+        "/login",
+        status_code=303
+    )
+@app.get("/logout")
+async def logout(request: Request):
+
+    request.session.clear()
+
+    return RedirectResponse(
+        "/login",
         status_code=303
     )
