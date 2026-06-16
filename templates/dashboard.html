@@ -90,7 +90,7 @@ ESP32:
         class="btn btn-primary mt-2"
         onclick="
         return confirm(
-        'Kết nối lại mạng gốc ATDTECH ?'
+        'Kết nối lại mạng gốc X200?'
         )">
 
         🔄 Kết nối lại mạng gốc
@@ -413,6 +413,7 @@ async function updateStatus()
         data.status;
 }
 
+
 async function updateWifi()
 {
     let res =
@@ -428,6 +429,18 @@ async function updateWifi()
     ).innerHTML =
         data.wifi;
 
+    if (
+        data.wifi === "Disconnected"
+    )
+    {
+        document.getElementById(
+            "wifiType"
+        ).innerHTML =
+            "Không có kết nối";
+
+        return;
+    }
+
     document.getElementById(
         "wifiType"
     ).innerHTML =
@@ -437,6 +450,14 @@ async function updateWifi()
         :
         "Mạng gốc X200";
 }
+
+updateWifi();
+
+setInterval(
+    updateWifi,
+    3000
+);
+</script>
 
 updateStatus();
 updateWifi();

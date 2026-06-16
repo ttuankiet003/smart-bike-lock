@@ -676,31 +676,27 @@ async def api_emergency_unlock():
     return load_emergency()
 
 @app.post("/wifi_status")
-async def wifi_status(
-    request: Request
-):
+async def wifi_status(request: Request):
 
-    data = await request.json()
+    incoming = await request.json()
 
-    save_wifi(
-        {
-            "wifi":
-                data.get(
-                    "wifi",
-                    "Disconnected"
-                ),
-            "backup":
-                data.get(
-                    "backup",
-                    False
-                ),
-            "reconnect":
-                load_wifi().get(
-                    "reconnect",
-                    False
-                )
-        }
+    data = load_wifi()
+
+    data["wifi"] = incoming.get(
+        "wifi",
+        "Disconnected"
     )
+
+    data["backup"] = incoming.get(
+        "backup",
+        False
+    )
+
+    save_wifi(data)
+
+    return {
+        "success": True
+    }
 
     return {
         "success": True
