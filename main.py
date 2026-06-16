@@ -52,9 +52,12 @@ STATUS_FILE = os.path.join(
     DATA_DIR,
     "esp_status.json"
 )
-
+WIFI_FILE = os.path.join(
+    DATA_DIR,
+    "wifi_status.json"
+)
 if not os.path.exists(STATUS_FILE):
-
+    
     with open(
         STATUS_FILE,
         "w"
@@ -66,7 +69,21 @@ if not os.path.exists(STATUS_FILE):
             },
             f
         )
+if not os.path.exists(WIFI_FILE):
 
+    with open(
+        WIFI_FILE,
+        "w"
+    ) as f:
+
+        json.dump(
+            {
+                "wifi": "Disconnected",
+                "backup": False,
+                "reconnect": False
+            },
+            f
+        )
 if not os.path.exists(EMERGENCY_FILE):
 
     with open(
@@ -120,6 +137,32 @@ def save_status(data):
     ) as f:
 
         json.dump(data, f)
+        
+def load_wifi():
+
+    with open(
+        WIFI_FILE,
+        "r",
+        encoding="utf-8"
+    ) as f:
+
+        return json.load(f)
+
+
+def save_wifi(data):
+
+    with open(
+        WIFI_FILE,
+        "w",
+        encoding="utf-8"
+    ) as f:
+
+        json.dump(
+            data,
+            f,
+            ensure_ascii=False,
+            indent=4
+        )
 def load_emergency():
     try:
         with open(
@@ -631,3 +674,75 @@ async def emergency_unlock():
 async def api_emergency_unlock():
 
     return load_emergency()
+
+@app.post("/wifi_status")
+async def wifi_status(
+    request: Request
+):
+
+    data = await request.json()
+
+    save_wifi(
+        {
+            "wifi":
+                data.get(
+                    "wifi",
+                    "Disconnected"
+                ),
+            "backup":
+                data.get(
+                    "backup",
+                    False
+                ),
+            "reconnect":
+                load_wifi().get(
+                    "reconnect",
+                    False
+                )
+        }
+    )
+
+    return {
+        "success": True
+    }
+@app.get("/api/current_wifi")
+async def current_wifi():
+
+    return load_wifi()
+@app.post("/reconnect_primary")
+async def reconnect_primary():
+
+    data =load_wifi()
+
+    data["reconnect"] = True
+
+    save_wifi(data)
+
+    return RedirectResponse(
+        "/",
+        status_code=303
+    )
+@app.get("/api/reconnect_primary")
+async def api_reconnect_primary():
+
+    data =load_wifi()
+
+    return {
+        "reconnect":
+            data.get(
+                "reconnect",
+                False
+            )
+    }
+@app.post("/reconnect_primary_done")
+async def reconnect_primary_done():
+
+    data =load_wifi()
+
+    data["reconnect"] = False
+
+    save_wifi(data)
+
+    return {
+        "success": True
+    }

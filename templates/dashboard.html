@@ -49,7 +49,21 @@
     <div class="card-body">
 
         <h3>📡 Trạng thái hệ thống</h3>
+        <p>
+    <strong>WiFi hiện tại:</strong>
 
+    <span id="wifiName">
+        Đang tải...
+    </span>
+</p>
+
+<p>
+    <strong>Loại mạng:</strong>
+
+    <span id="wifiType">
+        Đang tải...
+    </span>
+</p>
         <p>
             <strong>Server:</strong>
             {{ status }}
@@ -68,7 +82,22 @@
 <p>
 
 ESP32:
+<form
+    action="/reconnect_primary"
+    method="post">
 
+    <button
+        class="btn btn-primary mt-2"
+        onclick="
+        return confirm(
+        'Kết nối lại mạng gốc ATDTECH ?'
+        )">
+
+        🔄 Kết nối lại mạng gốc
+
+    </button>
+
+</form>
 {% if esp_online %}
 
 <span class="badge bg-success">
@@ -367,8 +396,9 @@ OFFLINE
 </div>
 
 <script>
-setInterval(async () => {
 
+async function updateStatus()
+{
     let res =
         await fetch(
             "/api/lock_status"
@@ -381,8 +411,46 @@ setInterval(async () => {
         "lockStatus"
     ).innerHTML =
         data.status;
+}
 
-}, 1000);
+async function updateWifi()
+{
+    let res =
+        await fetch(
+            "/api/current_wifi"
+        );
+
+    let data =
+        await res.json();
+
+    document.getElementById(
+        "wifiName"
+    ).innerHTML =
+        data.wifi;
+
+    document.getElementById(
+        "wifiType"
+    ).innerHTML =
+        data.backup
+        ?
+        "WiFi tạm thời"
+        :
+        "Mạng gốc ATDTECH";
+}
+
+updateStatus();
+updateWifi();
+
+setInterval(
+    updateStatus,
+    1000
+);
+
+setInterval(
+    updateWifi,
+    3000
+);
+
 </script>
 </body>
 </html>
