@@ -12,14 +12,17 @@ from datetime import datetime
 from fastapi.responses import HTMLResponse
 from starlette.middleware.sessions import SessionMiddleware
 import time
-
+from flask import Flask, render_template, request, jsonify
 app = FastAPI()
 app.add_middleware(
     SessionMiddleware,
     secret_key="SMART_BIKE_LOCK_2026"
 )
 security = HTTPBasic()
-
+gps_data = {
+    "latitude": 0,
+    "longitude": 0
+}
 
 templates = Jinja2Templates(directory="templates")
 
@@ -742,3 +745,18 @@ async def reconnect_primary_done():
     return {
         "success": True
     }
+@app.post("/gps")
+def update_gps():
+    global gps_data
+
+    data = request.get_json()
+
+    gps_data["latitude"] = data["latitude"]
+    gps_data["longitude"] = data["longitude"]
+
+    return jsonify({
+        "success": True
+    })
+@app.get("/gps")
+def get_gps():
+    return jsonify(gps_data)
