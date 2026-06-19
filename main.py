@@ -12,7 +12,7 @@ from datetime import datetime
 from fastapi.responses import HTMLResponse
 from starlette.middleware.sessions import SessionMiddleware
 import time
-
+from fastapi import Request
 app = FastAPI()
 app.add_middleware(
     SessionMiddleware,
@@ -748,18 +748,16 @@ async def reconnect_primary_done():
     return {
         "success": True
     }
+
+
 @app.post("/gps")
-async def update_gps(data: GPSRequest):
-    global gps_data
+async def update_gps(request: Request):
+    data = await request.json()
 
-    gps_data["latitude"] = data.latitude
-    gps_data["longitude"] = data.longitude
+    print(data)
 
-    print(
-        "GPS:",
-        gps_data["latitude"],
-        gps_data["longitude"]
-    )
+    gps_data["latitude"] = data["latitude"]
+    gps_data["longitude"] = data["longitude"]
 
     return {
         "success": True
