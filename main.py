@@ -452,6 +452,9 @@ async def pending_users():
 
 class EnrollRequest(BaseModel):
     id: int
+class GPSRequest(BaseModel):
+    latitude: float
+    longitude: float
 @app.post("/enroll_success")
 async def enroll_success(request: Request):
 
@@ -746,17 +749,21 @@ async def reconnect_primary_done():
         "success": True
     }
 @app.post("/gps")
-def update_gps():
+async def update_gps(data: GPSRequest):
     global gps_data
 
-    data = request.get_json()
+    gps_data["latitude"] = data.latitude
+    gps_data["longitude"] = data.longitude
 
-    gps_data["latitude"] = data["latitude"]
-    gps_data["longitude"] = data["longitude"]
+    print(
+        "GPS:",
+        gps_data["latitude"],
+        gps_data["longitude"]
+    )
 
-    return jsonify({
+    return {
         "success": True
-    })
+    }
 @app.get("/gps")
-def get_gps():
-    return jsonify(gps_data)
+async def get_gps():
+    return gps_data
