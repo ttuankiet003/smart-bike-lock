@@ -12,7 +12,7 @@ from datetime import datetime
 from fastapi.responses import HTMLResponse
 from starlette.middleware.sessions import SessionMiddleware
 import time
-from flask import Flask, render_template, request, jsonify
+
 app = FastAPI()
 app.add_middleware(
     SessionMiddleware,
