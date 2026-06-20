@@ -792,3 +792,103 @@ async def api_esp_status():
     return {
         "online": online
     }
+@app.post("/api/login")
+async def api_login(
+    request: Request
+):
+    data = await request.json()
+
+    settings = load_settings()
+
+    if (
+        data["username"] ==
+        settings["username"]
+        and
+        data["password"] ==
+        settings["password"]
+    ):
+        return {
+            "success": True
+        }
+
+    return {
+        "success": False
+    }
+@app.post("/api/change_password")
+async def api_change_password(
+    request: Request
+):
+    data = await request.json()
+
+    settings = load_settings()
+
+    if (
+        data["old_password"] !=
+        settings["password"]
+    ):
+        return {
+            "success": False
+        }
+
+    settings["password"] = data["new_password"]
+
+    save_settings(settings)
+
+    return {
+        "success": True
+    }
+@app.post("/api/add_user")
+async def api_add_user(
+    request: Request
+):
+    data = await request.json()
+
+    users = load_users()
+
+    users.append(
+        {
+            "id": data["id"],
+            "name": data["name"],
+            "status": "waiting"
+        }
+    )
+
+    save_users(users)
+
+    return {
+        "success": True
+    }
+@app.post("/api/delete_user")
+async def api_delete_user(
+    request: Request
+):
+    data = await request.json()
+
+    queue = load_delete_queue()
+
+    queue.append(
+        {
+            "id": data["id"]
+        }
+    )
+
+    save_delete_queue(queue)
+
+    return {
+        "success": True
+    }
+@app.get("/api/esp_status")
+async def api_esp_status():
+
+    status_data = load_status()
+
+    online = (
+        time.time()
+        -
+        status_data["last_seen"]
+        < 60
+    )
+
+    return {
+        "online": online
+    }
