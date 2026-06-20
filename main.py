@@ -779,3 +779,16 @@ async def update_gps(request: Request):
 @app.get("/gps")
 async def get_gps():
     return gps_data
+@app.get("/api/esp_status")
+async def api_esp_status():
+
+    status = load_status()
+
+    online = (
+        time.time()
+        - status["last_seen"]
+    ) < 60
+
+    return {
+        "online": online
+    }
