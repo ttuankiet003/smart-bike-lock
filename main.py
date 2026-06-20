@@ -8,7 +8,8 @@ from fastapi import Body
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi import Depends, HTTPException, status
 import secrets
-from datetime import datetime
+from datetime import datetime , timedelta
+from zoneinfo import ZoneInfo
 from fastapi.responses import HTMLResponse
 from starlette.middleware.sessions import SessionMiddleware
 import time
@@ -25,6 +26,8 @@ gps_data = {
 }
 
 templates = Jinja2Templates(directory="templates")
+
+# lấy giờ việt nam
 
 # =========================
 # Database
@@ -484,6 +487,11 @@ async def enroll_success(request: Request):
         "success": True,
         "id": uid
     }
+#giờ VN
+def vn_now():
+    return datetime.now(
+        ZoneInfo("Asia/Ho_Chi_Minh")
+    )
 # =========================
 # Unlock Log
 # =========================
@@ -507,15 +515,15 @@ async def unlock(request: Request):
             break
 
     UNLOCK_LOG.insert(
-        0,
-        {
-            "id": uid,
-            "name": name,
-            "time": datetime.now().strftime(
-                "%d/%m/%Y %H:%M:%S"
-            )
-        }
-    )
+    0,
+    {
+        "id": uid,
+        "name": name,
+        "time": vn_now().strftime(
+    "%d/%m/%Y %H:%M:%S"
+)
+    }
+)
 
     return {
         "success": True
