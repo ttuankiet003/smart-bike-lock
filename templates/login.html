@@ -1,63 +1,175 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="vi">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
 
-<meta charset="utf-8">
-
-<title>Đăng nhập</title>
+```
+<title>Smart Bike Lock - Đăng nhập</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet">
 
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+    body {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        background:
+            linear-gradient(
+                135deg,
+                #0d6efd,
+                #4f46e5
+            );
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 420px;
+
+        border: none;
+        border-radius: 20px;
+
+        box-shadow:
+            0 20px 40px
+            rgba(0, 0, 0, 0.2);
+    }
+
+    .logo {
+        font-size: 70px;
+        color: #0d6efd;
+    }
+
+    .title {
+        font-weight: bold;
+    }
+
+    .subtitle {
+        color: gray;
+        font-size: 14px;
+    }
+
+    .form-control {
+        height: 50px;
+        border-radius: 12px;
+    }
+
+    .btn-login {
+        height: 50px;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 17px;
+    }
+
+    .version {
+        font-size: 13px;
+        color: gray;
+    }
+</style>
+```
+
 </head>
 
-<body class="bg-light">
+<body>
 
-<div class="container">
+<div class="card login-card">
 
-<div class="row justify-content-center">
+```
+<div class="card-body p-5">
 
-<div class="col-md-4">
+    <div class="text-center mb-4">
 
-<div class="card mt-5 shadow">
+        <div class="logo">
+            🚲
+        </div>
 
-<div class="card-body">
+        <h2 class="title">
+            Smart Bike Lock
+        </h2>
 
-<h3 class="text-center">
-🚲 Smart Bike Lock
-</h3>
+        <div class="subtitle">
+            Hệ thống khóa xe thông minh bằng vân tay
+        </div>
 
-<form method="post"
-      action="/login">
+    </div>
 
-<input
-class="form-control mb-3"
-name="username"
-placeholder="Tên đăng nhập">
+    <form action="/login"
+          method="post">
 
-<input
-type="password"
-class="form-control mb-3"
-name="password"
-placeholder="Mật khẩu">
+        <div class="mb-3">
 
-<button
-class="btn btn-primary w-100">
+            <label class="form-label">
+                Tên đăng nhập
+            </label>
 
-Đăng nhập
+            <div class="input-group">
 
-</button>
+                <span class="input-group-text">
+                    <i class="fa-solid fa-user"></i>
+                </span>
 
-</form>
+                <input
+                    type="text"
+                    name="username"
+                    class="form-control"
+                    placeholder="Nhập tên đăng nhập"
+                    required>
+
+            </div>
+
+        </div>
+
+        <div class="mb-4">
+
+            <label class="form-label">
+                Mật khẩu
+            </label>
+
+            <div class="input-group">
+
+                <span class="input-group-text">
+                    <i class="fa-solid fa-lock"></i>
+                </span>
+
+                <input
+                    type="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="Nhập mật khẩu"
+                    required>
+
+            </div>
+
+        </div>
+
+        <button
+            class="btn btn-primary btn-login w-100"
+            type="submit">
+
+            <i class="fa-solid fa-right-to-bracket"></i>
+            Đăng nhập
+
+        </button>
+
+    </form>
+
+    <div class="text-center mt-4 version">
+
+        Smart Bike Lock v1.0<br>
+        ESP32 + R503 + GPS + Railway
+
+    </div>
 
 </div>
-
-</div>
-
-</div>
-
-</div>
+```
 
 </div>
 
