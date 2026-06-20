@@ -15,6 +15,11 @@ from starlette.middleware.sessions import SessionMiddleware
 import time
 from fastapi import Request
 app = FastAPI()
+app.mount(
+    "/static",
+    StaticFiles(directory="static"),
+    name="static"
+)
 app.add_middleware(
     SessionMiddleware,
     secret_key="SMART_BIKE_LOCK_2026"
