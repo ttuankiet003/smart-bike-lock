@@ -14,6 +14,7 @@ from fastapi.responses import HTMLResponse
 from starlette.middleware.sessions import SessionMiddleware
 import time
 from fastapi import Request
+from fastapi.staticfiles import StaticFiles
 app = FastAPI()
 app.mount(
     "/static",
