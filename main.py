@@ -901,13 +901,17 @@ async def alarm():
     global alarm_data
 
     alarm_data["alarm"] = True
-    alarm_data["time"] = datetime.now().strftime(
-        "%d/%m/%Y %H:%M:%S"
+    alarm_data["time"] = vn_now().strftime(
+    "%d/%m/%Y %H:%M:%S"
     )
 
     return {
-        "success": True
+        "success": True,
+        "alarm": alarm_data["alarm"],
+        "time": alarm_data["time"]
     }
+
+
 @app.post("/alarm_clear")
 async def alarm_clear():
     global alarm_data
@@ -915,9 +919,15 @@ async def alarm_clear():
     alarm_data["alarm"] = False
 
     return {
-        "success": True
+        "success": True,
+        "alarm": alarm_data["alarm"],
+        "time": alarm_data["time"]
     }
+
+
 @app.get("/api/alarm")
 async def get_alarm():
-
-    return alarm_data
+    return {
+        "alarm": alarm_data["alarm"],
+        "time": alarm_data["time"]
+    }
