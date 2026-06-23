@@ -898,6 +898,7 @@ async def api_esp_status():
     }
 @app.post("/alarm")
 async def alarm():
+    global alarm_data
 
     alarm_data["alarm"] = True
     alarm_data["time"] = datetime.now().strftime(
@@ -909,6 +910,7 @@ async def alarm():
     }
 @app.post("/alarm_clear")
 async def alarm_clear():
+    global alarm_data
 
     alarm_data["alarm"] = False
 
