@@ -106,7 +106,19 @@
             {% endif %}
 
         </p>
+        <p>
+    <strong>Chống trộm:</strong>
 
+    <span id="alarmStatus">
+
+        {% if alarm.alarm %}
+            🚨 CÓ TRỘM
+        {% else %}
+            An toàn
+        {% endif %}
+
+    </span>
+</p>
         <form
             action="/reconnect_primary"
             method="post">
@@ -294,6 +306,7 @@
     </div>
 
 </div>
+
 
 <!-- Danh sách vân tay -->
 

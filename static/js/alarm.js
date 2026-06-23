@@ -1,41 +1,30 @@
+<script>
+
 async function updateAlarm()
 {
-    try
-    {
-        let res =
-            await fetch(
-                "/api/alarm"
-            );
+    let res =
+        await fetch(
+            "/api/alarm"
+        );
 
-        let data =
-            await res.json();
+    let data =
+        await res.json();
 
-        let alarm =
-            document.getElementById(
-                "alarmStatus"
-            );
-
-        if (!alarm)
-            return;
-
-        if (data.alarm)
-        {
-            alarm.innerHTML =
-                "🚨 XE ĐANG BỊ DI CHUYỂN";
-        }
-        else
-        {
-            alarm.innerHTML =
-                "✅ AN TOÀN";
-        }
-    }
-    catch (e)
-    {
-        console.log(e);
-    }
+    document.getElementById(
+        "alarmStatus"
+    ).innerHTML =
+        data.alarm
+        ?
+        "🚨 CÓ TRỘM"
+        :
+        "An toàn";
 }
+
+updateAlarm();
 
 setInterval(
     updateAlarm,
     1000
 );
+
+</script>

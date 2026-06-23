@@ -30,7 +30,10 @@ gps_data = {
     "latitude": 0,
     "longitude": 0
 }
-
+alarm_data = {
+    "alarm": False,
+    "time": ""
+}
 templates = Jinja2Templates(directory="templates")
 
 # lấy giờ việt nam
@@ -346,7 +349,8 @@ async def dashboard(
             "users": users,
             "logs": UNLOCK_LOG,
             "esp_online": esp_online,
-            "emergency_unlock": emergency["unlock"]
+            "emergency_unlock": emergency["unlock"],
+            "alarm": alarm_data
         }
     )
 
@@ -892,3 +896,26 @@ async def api_esp_status():
     return {
         "online": online
     }
+@app.post("/alarm")
+async def alarm():
+
+    alarm_data["alarm"] = True
+    alarm_data["time"] = datetime.now().strftime(
+        "%d/%m/%Y %H:%M:%S"
+    )
+
+    return {
+        "success": True
+    }
+@app.post("/alarm_clear")
+async def alarm_clear():
+
+    alarm_data["alarm"] = False
+
+    return {
+        "success": True
+    }
+@app.get("/api/alarm")
+async def get_alarm():
+
+    return alarm_data
