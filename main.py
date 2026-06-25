@@ -34,6 +34,10 @@ alarm_data = {
     "alarm": False,
     "time": ""
 }
+wifi_status = {
+    "wifi": "",
+    "backup": False
+}
 templates = Jinja2Templates(directory="templates")
 
 # lấy giờ việt nam
@@ -722,9 +726,7 @@ async def wifi_status(request: Request):
         "success": True
     }
 
-    return {
-        "success": True
-    }
+    
 @app.get("/api/current_wifi")
 async def current_wifi():
 
