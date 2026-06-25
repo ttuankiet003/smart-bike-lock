@@ -4,7 +4,7 @@ async function updateWifi()
     {
         let res =
             await fetch(
-                "/api/current_wifi"
+                "/api/wifi_status"
             );
 
         let data =
