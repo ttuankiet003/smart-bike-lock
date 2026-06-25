@@ -725,7 +725,9 @@ async def wifi_status(request: Request):
     return {
         "success": True
     }
-
+@app.get("/api/wifi_status")
+def get_wifi_status():
+    return wifi_status
     
 @app.get("/api/current_wifi")
 async def current_wifi():
