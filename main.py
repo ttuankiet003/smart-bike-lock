@@ -32,7 +32,8 @@ gps_data = {
 }
 alarm_data = {
     "alarm": False,
-    "time": ""
+    "time": "",
+    "disabled": False
 }
 wifi_status = {
     "wifi": "",
@@ -514,7 +515,7 @@ UNLOCK_LOG = []
 
 @app.post("/unlock")
 async def unlock(request: Request):
-
+    global alarm_data
     data = await request.json()
 
     uid = int(data["id"])
@@ -538,7 +539,7 @@ async def unlock(request: Request):
 )
     }
 )
-
+    alarm_data["disabled"] = False
     return {
         "success": True
     }
@@ -659,12 +660,12 @@ async def heartbeat():
 async def lock_status(
     request: Request
 ):
-    global LOCK_STATUS
+    global LOCK_STATUS, alarm_data
 
     data = await request.json()
 
     LOCK_STATUS = data["status"]
-
+    alarm_data["disabled"] = False
     return {
         "success": True
     }
@@ -677,7 +678,7 @@ async def api_lock_status():
 
 @app.post("/emergency_unlock")
 async def emergency_unlock():
-
+    global alarm_data
     data = load_emergency()
 
     unlock = data["unlock"]
@@ -691,7 +692,7 @@ async def emergency_unlock():
             "unlock": new_state
         }
     )
-
+    alarm_data["disabled"] = False
     print(load_emergency())
 
     return RedirectResponse(
@@ -904,15 +905,20 @@ async def api_esp_status():
 async def alarm():
     global alarm_data
 
-    alarm_data["alarm"] = True
-    alarm_data["time"] = vn_now().strftime(
-    "%d/%m/%Y %H:%M:%S"
-    )
+    # alarm_data["alarm"] = True
+    # alarm_data["time"] = vn_now().strftime(
+    # "%d/%m/%Y %H:%M:%S"
+    # )
+    # Chỉ cho phép báo động nếu không ở trạng thái disabled
+    if not alarm_data.get("disabled", False):
+        alarm_data["alarm"] = True
+        alarm_data["time"] = vn_now().strftime("%d/%m/%Y %H:%M:%S")
 
     return {
         "success": True,
         "alarm": alarm_data["alarm"],
-        "time": alarm_data["time"]
+        "time": alarm_data["time"],
+        "disabled": alarm_data.get("disabled", False)
     }
 
 
@@ -921,17 +927,30 @@ async def alarm_clear():
     global alarm_data
 
     alarm_data["alarm"] = False
-
+    alarm_data["disabled"] = False 
     return {
         "success": True,
         "alarm": alarm_data["alarm"],
-        "time": alarm_data["time"]
+        "time": alarm_data["time"],
+        "disabled": alarm_data["disabled"]
     }
+@app.post("/alarm_disable")
+async def alarm_disable():
+    global alarm_data
 
+    alarm_data["alarm"] = False
+    alarm_data["disabled"] = True # Tắt vĩnh viễn (đến khi có thao tác khóa)
+
+    return {
+        "success": True,
+        "disabled": True
+    }
 
 @app.get("/api/alarm")
 async def get_alarm():
     return {
         "alarm": alarm_data["alarm"],
-        "time": alarm_data["time"]
+        "time": alarm_data["time"],
+        "disabled": alarm_data.get("disabled", False)
     }
+
