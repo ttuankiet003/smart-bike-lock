@@ -39,6 +39,14 @@ wifi_status = {
     "wifi": "",
     "backup": False
 }
+
+# --- THÊM MỚI: Lệnh điều khiển ESP32 ---
+esp_commands = {
+    "reset": False,
+    "sleep": False,
+    "pause_gps": False
+}
+
 templates = Jinja2Templates(directory="templates")
 
 # lấy giờ việt nam
@@ -77,7 +85,7 @@ WIFI_FILE = os.path.join(
     "wifi_status.json"
 )
 if not os.path.exists(STATUS_FILE):
-    
+
     with open(
         STATUS_FILE,
         "w"
@@ -157,7 +165,7 @@ def save_status(data):
     ) as f:
 
         json.dump(data, f)
-        
+
 def load_wifi():
 
     with open(
@@ -343,7 +351,7 @@ async def dashboard(
     status_data["last_seen"]
     )   < 60:
 
-        esp_online = True   
+        esp_online = True
 
     return templates.TemplateResponse(
         request=request,
@@ -411,7 +419,7 @@ async def add_user(
                     "users": users,
                     "logs": UNLOCK_LOG,
                     "error": f"ID {id} đã tồn tại"
-                  
+
                 }
             )
 
@@ -731,7 +739,7 @@ async def wifi_status(request: Request):
 #     return wifi_status
 @app.get("/api/wifi_status")
 async def api_get_wifi_status():
-    return load_wifi()  
+    return load_wifi()
 @app.get("/api/current_wifi")
 async def current_wifi():
 
@@ -773,6 +781,30 @@ async def reconnect_primary_done():
     return {
         "success": True
     }
+
+# --- THÊM MỚI: API Command ---
+@app.get("/api/esp_command")
+async def get_esp_command():
+    return esp_commands
+
+@app.post("/api/send_command")
+async def send_command(request: Request):
+    global esp_commands
+    data = await request.json()
+    cmd = data.get("cmd")
+    val = data.get("val", False)
+    if cmd in esp_commands:
+        esp_commands[cmd] = val
+    return {"success": True, "current": esp_commands}
+
+@app.post("/api/command_done")
+async def command_done(request: Request):
+    global esp_commands
+    data = await request.json()
+    cmd = data.get("cmd")
+    if cmd in esp_commands:
+        esp_commands[cmd] = False
+    return {"success": True}
 
 
 @app.post("/gps")
@@ -929,7 +961,7 @@ async def alarm_clear():
     global alarm_data
 
     alarm_data["alarm"] = False
-    alarm_data["disabled"] = False 
+    alarm_data["disabled"] = False
     return {
         "success": True,
         "alarm": alarm_data["alarm"],
